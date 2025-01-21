@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-sidecar
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sidecar
+  template:
+    metadata:
+      labels:
+        app: sidecar
+    spec:
+      containers:
+        - name: springboot-app
+          image: diyaannasunil1/sidecar:latest
+
+          ports:
+            - containerPort: 8080
+        - name: envoy-proxy
+          image: envoyproxy/envoy:v1.26.0
+          ports:
+            - containerPort: 8081
+          volumeMounts:
+            - name: envoy-config
+              mountPath: /etc/envoy
+              readOnly: true
+      volumes:
+        - name: envoy-config
+          configMap:
+            name: envoy-config
